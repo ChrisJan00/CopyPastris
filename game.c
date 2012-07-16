@@ -160,6 +160,19 @@ draw_tetramino(struct game *g, const int *blocks, int bg, int tc)
 	SDL_UpdateRects(screen, i, update);
 }
 
+void draw_block(struct game *g, int x, int y, int color, int alpha)
+{
+    SDL_Rect r;
+    const struct position *p = g->frontend;
+    r.w = r.h = p->size;
+    r.x = p->x + x * p->size;
+    r.y = p->y + y * p->size;
+    SDL_SetAlpha(block[color], SDL_SRCALPHA, alpha);
+    SDL_BlitSurface(block[color], NULL, screen, &r);
+    SDL_SetAlpha(block[color], SDL_SRCALPHA, 0xFF);
+    SDL_UpdateRects(screen, 1, &r);
+}
+
 /*
  * funkcja wyswietla tetramino jakie poleci w nastepnej kolejnosci,
  * przy okazji jak jest nowe tetramino (bo wtedy jest odpalana), to mozna

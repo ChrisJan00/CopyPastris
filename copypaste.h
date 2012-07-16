@@ -9,5 +9,6 @@ void manage_paste(struct game *g);
 void manage_cut(struct game *g);
 
 void select_background(struct game *g, int x, int y);
+void draw_preview(struct game *g);
 
 #endif

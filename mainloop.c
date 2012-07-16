@@ -23,7 +23,8 @@ static int event_filter(const SDL_Event *);
 static void handle_keyboard(const SDL_keysym *, struct game *);
 static void handle_fakekeyboard(const SDL_keysym *, struct game *);
 static void handle_keyboardUnpressed(const SDL_keysym *, struct game *);
-static void handle_mouse();
+static void handle_mousedown(struct game *);
+static void handle_mousemove(struct game *);
 
 void
 main_loop(struct game *g)
@@ -44,7 +45,10 @@ main_loop(struct game *g)
                 handle_keyboardUnpressed(&e.key.keysym, g);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                handle_mouse(g);
+                handle_mousedown(g);
+                break;
+            case SDL_MOUSEMOTION:
+                handle_mousemove(g);
                 break;
             case SDL_QUIT:
                 return;
@@ -162,9 +166,16 @@ static void handle_keyboardUnpressed(const SDL_keysym *k, struct game *g)
 }
 
 static void
-handle_mouse(struct game *g)
+handle_mousedown(struct game *g)
 {
     mouseClicked(g);
+}
+
+static void
+handle_mousemove(struct game *g)
+{
+    redraw_all(g);
+    draw_preview(g);
 }
 
 static int

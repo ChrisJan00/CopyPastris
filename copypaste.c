@@ -10,6 +10,7 @@ typedef struct {
     int len;
     int ox, oy;
     bool isTetramino;
+    bool valid;
 } blockinfo;
 
 blockinfo Buffer;
@@ -93,6 +94,8 @@ static void push_tetramino(struct game * g)
     }
 
     Buffer.isTetramino = true;
+    Buffer.ox = -1;
+    Buffer.oy = -1;
 
 //    fflush(0);
 }
@@ -106,7 +109,7 @@ static bool can_pop_tetramino(struct game *g, int x, int y)
     if (!custom_check_bounds(Buffer.pos, Buffer.len, x, y))
     {
         return false;
-}
+    }
 
     // check collision
     if (!check_squares(g, Buffer.pos, Buffer.len, x, y))
@@ -230,8 +233,8 @@ static void move_selection_to_buffer(struct game *g)
     Buffer.isTetramino = false;
     Buffer.color = Selection.color;
     Buffer.len = Selection.len;
-    Buffer.ox = Selection.ox;
-    Buffer.oy = Selection.oy;
+    Buffer.ox = -1;
+    Buffer.oy = -1;
 }
 
 static void del_selection(struct game *g)
@@ -265,13 +268,15 @@ custom_check_bounds(const int *tmino, int len, int x, int y)
         return false;
 
     for (i = 0; i < len; ++i) {
-        int x_pos = tmino[i] % MATRIX_WIDTH + x;
+        int x_tmp = tmino[i] % MATRIX_WIDTH;
+        int x_pos = x_tmp - MATRIX_WIDTH * ((x_tmp*2)/MATRIX_WIDTH) + x;
         int y_pos = tmino[i] / MATRIX_WIDTH + y;
 
 
         if (y_pos < 0 || y_pos >= MATRIX_HEIGHT
-            || x_pos < 0 || x_pos >= MATRIX_WIDTH)
+            || x_pos < 0 || x_pos >= MATRIX_WIDTH) {
             return false;
+        }
     }
 
     return true;
@@ -322,5 +327,35 @@ static void custom_check_lines(struct game *g, int destx, int desty)
     if (g->lines_cleared >= LINES_PER_LEVEL * g->level) {
         if (g->levelup)
             g->levelup(g);
+    }
+}
+
+void draw_preview(struct game *g)
+{
+    // no preview
+    if (Buffer.len == 0)
+        return;
+
+    // out of screen
+    int mx, my;
+    if (!get_mousecoords(g, &mx, &my))
+        return;
+
+    // new location: check if it's valid
+    if (mx != Buffer.ox || my != Buffer.oy) {
+        Buffer.valid = can_pop_tetramino(g, mx,my);
+        Buffer.ox = mx;
+        Buffer.oy = my;
+    }
+
+    // drawing code
+    int i;
+    for (i = 0; i < Buffer.len; i++) {
+        int x = Buffer.pos[i] % MATRIX_WIDTH + Buffer.ox;
+        int y = Buffer.pos[i] / MATRIX_WIDTH + Buffer.oy;
+        if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
+            continue;
+        int alpha = Buffer.valid ? 0x80 : 0x40;
+        draw_block(g, x, y, Buffer.color, alpha);
     }
 }
