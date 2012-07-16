@@ -1,0 +1,10 @@
+find out extra paint operations and optimize
+bg color changes
+preview:
+/ when empty position & valid, show preview shaded
+/ when empty & invalid, show red shaded preview
+/ when on block, shade the block slightly (floodfill)
+/ when block is clicked, mark as selected (blue shade)
+avoid alpha blending, use pre-computed blocks
+animation when line is cleared (white)
+
