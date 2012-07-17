@@ -15,6 +15,7 @@ typedef struct {
 
 blockinfo Buffer;
 blockinfo Selection;
+blockinfo Mark;
 
 static void push_tetramino(struct game * g);
 static void pop_tetramino(struct game *g, int x, int y);
@@ -28,6 +29,7 @@ static void del_selection(struct game *g);
 static bool
 custom_check_bounds(const int *tmino, int len, int x, int y);
 static void custom_check_lines(struct game *g, int destx, int desty);
+static void unmark_background(struct game *g);
 
 void restart_buffer(struct game *g)
 {
@@ -39,6 +41,7 @@ void restart_buffer(struct game *g)
     for (i=0; i<MATRIX_SIZE; i++) {
         g->m[i].unvisited = true;
         g->m[i].selected = false;
+        g->m[i].marked = false;
     }
 }
 
@@ -133,10 +136,14 @@ static void pop_tetramino(struct game *g, int x, int y)
     }
 }
 
-
+void select_tmino(struct game *g, int x, int y)
+{
+    g->selected = true;
+}
 
 void select_background(struct game *g, int x, int y)
 {
+    g->selected = false;
     unselect_background(g);
 
     int pos = x + y * MATRIX_WIDTH;
@@ -185,6 +192,23 @@ static void recurse_bg(struct game *g, int x, int y)
     }
 }
 
+static void recurse_bg_mark(struct game *g, int x, int y)
+{
+    if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y > MATRIX_HEIGHT)
+        return;
+
+    int pos = x + y * MATRIX_WIDTH;
+    if (g->m[pos].color == Mark.color && g->m[pos].visible && g->m[pos].unvisited) {
+        Mark.pos[Mark.len++] = pos;
+        g->m[pos].unvisited = false;
+        g->m[pos].marked = true;
+        recurse_bg(g, x-1, y);
+        recurse_bg(g, x+1, y);
+        recurse_bg(g, x, y-1);
+        recurse_bg(g, x, y+1);
+    }
+}
+
 static void prepare_selection(struct game *g)
 {
     int i;
@@ -225,6 +249,40 @@ static void normalize_selection()
     }
 }
 
+static void normalize_mark()
+{
+    int minx, maxx, miny, maxy;
+    int i;
+
+    if (Mark.len == 0)
+        return;
+
+    minx = Mark.pos[0] % MATRIX_WIDTH;
+    miny = Mark.pos[0] / MATRIX_WIDTH;
+    maxx = minx;
+    maxy = miny;
+    for (i = 1; i < Mark.len; i++) {
+        int x = Mark.pos[i] % MATRIX_WIDTH;
+        int y = Mark.pos[i] / MATRIX_WIDTH;
+        if (x < minx)
+            x = minx;
+        if (x > maxx)
+            x = maxx;
+        if (x < miny)
+            y = miny;
+        if (y > maxy)
+            y = maxy;
+    }
+    Mark.ox = (minx + maxx) / 2;
+    Mark.oy = (miny + maxy) / 2;
+    for (i = 0; i < Mark.len; i++) {
+        int x = Mark.pos[i] % MATRIX_WIDTH - Mark.ox;
+        int y = Mark.pos[i] / MATRIX_WIDTH - Mark.oy;
+        Mark.pos[i] = x + y * MATRIX_WIDTH;
+    }
+}
+
+
 static void move_selection_to_buffer(struct game *g)
 {
     int i;
@@ -235,6 +293,18 @@ static void move_selection_to_buffer(struct game *g)
     Buffer.len = Selection.len;
     Buffer.ox = -1;
     Buffer.oy = -1;
+}
+
+static void move_mark_to_selection(struct game *g)
+{
+    int i;
+    for (i=0; i < Mark.len; i++)
+        Selection.pos[i] = Mark.pos[i];
+    Selection.isTetramino = false;
+    Selection.color = Mark.color;
+    Selection.len = Mark.len;
+    Selection.ox = -1;
+    Selection.oy = -1;
 }
 
 static void del_selection(struct game *g)
@@ -343,19 +413,80 @@ void draw_preview(struct game *g)
 
     // new location: check if it's valid
     if (mx != Buffer.ox || my != Buffer.oy) {
+        redraw_all(g);
         Buffer.valid = can_pop_tetramino(g, mx,my);
         Buffer.ox = mx;
         Buffer.oy = my;
+
+        // drawing code
+        int i;
+        for (i = 0; i < Buffer.len; i++) {
+            int x = Buffer.pos[i] % MATRIX_WIDTH + Buffer.ox;
+            int y = Buffer.pos[i] / MATRIX_WIDTH + Buffer.oy;
+            if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
+                continue;
+            draw_block(g, x, y, Buffer.color, Buffer.valid);
+        }
     }
+}
+
+void draw_mark(struct game *g)
+{
+    // no preview
+    if (Mark.len == 0)
+        return;
+
+    // new location: check if it's valid
+    redraw_all(g);
 
     // drawing code
     int i;
-    for (i = 0; i < Buffer.len; i++) {
-        int x = Buffer.pos[i] % MATRIX_WIDTH + Buffer.ox;
-        int y = Buffer.pos[i] / MATRIX_WIDTH + Buffer.oy;
+    for (i = 0; i < Mark.len; i++) {
+        int x = Mark.pos[i] % MATRIX_WIDTH + Mark.ox;
+        int y = Mark.pos[i] / MATRIX_WIDTH + Mark.oy;
         if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
             continue;
-        int alpha = Buffer.valid ? 0x80 : 0x40;
-        draw_block(g, x, y, Buffer.color, alpha);
+        draw_block_mark(g, x, y, Mark.color);
     }
+}
+
+void mark_tmino(struct game *g, int x, int y)
+{
+    g->marked = true;
+}
+
+void mark_background(struct game *g, int x, int y)
+{
+    g->selected = false;
+    unmark_background(g);
+
+    int pos = x + y * MATRIX_WIDTH;
+
+    Mark.color = g->m[pos].color;
+    if (Mark.color > 10) {
+        printf("got %i in %i(%i,%i)\n",Mark.color,pos,x,y);
+        fflush(0);
+    }
+//    Mark.isTetramino = false;
+    prepare_selection(g);
+    recurse_bg_mark(g, x, y);
+//    normalize_selection();
+    Mark.ox = 0;
+    Mark.oy = 0;
+    redraw_all(g);
+}
+
+static void unmark_background(struct game *g)
+{
+    if (Mark.len == 0)
+        return;
+    // go through the background
+    int i;
+    for (i=0; i<Mark.len; i++) {
+        int x = Mark.pos[i] % MATRIX_WIDTH + Mark.ox;
+        int y = Mark.pos[i] / MATRIX_WIDTH + Mark.oy;
+        int pos = x + y * MATRIX_WIDTH;
+        g->m[pos].marked = false;
+    }
+    Mark.len = 0;
 }

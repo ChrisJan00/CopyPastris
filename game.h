@@ -26,6 +26,8 @@ void tetramino_preview(struct game *, const int *, int);
 void create_color_blocks(int);
 struct position compute_pos(int, int);
 void draw_matrix_border(const struct position *);
-void draw_block(struct game *g, int x, int y, int color, int alpha);
+void draw_block(struct game *g, int x, int y, int color, bool valid);
+void draw_block_mark(struct game *g, int x, int y, int color);
+void free_blocks();
 
 #endif

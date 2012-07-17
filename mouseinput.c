@@ -39,14 +39,32 @@ void mouseClicked(struct game *g)
         return;
 
 
-
     // falling tetramino
     if (check_fallingtmino(g, clickedx, clickedy)) {
-        g->selected = true;
+        select_tmino(g, clickedx, clickedy);
         redraw_all(g);
-    } else {
-        g->selected = false;
+    } else if (check_background(g, clickedx, clickedy)) {
         select_background(g, clickedx, clickedy);
+    }
+}
+
+void mouseHover(struct game *g)
+{
+    int clickedx, clickedy;
+
+    if (!get_mousecoords(g, &clickedx, &clickedy))
+        return;
+
+    // falling tetramino
+    g->marked = false;
+    if (check_fallingtmino(g, clickedx, clickedy)) {
+        mark_tmino(g, clickedx, clickedy);
+        redraw_all(g);
+    } else if (check_background(g, clickedx, clickedy)) {
+        mark_background(g, clickedx, clickedy);
+        draw_mark(g);
+    } else {
+        draw_preview(g);
     }
 }
 

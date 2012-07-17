@@ -27,6 +27,7 @@ struct square {
 	bool visible;
     bool unvisited;
     bool selected;
+    bool marked;
 };
 /* typ danych reprezentujacy plansze do gry, macierz struktur struct square */
 typedef struct square Matrix[MATRIX_SIZE];
@@ -65,6 +66,7 @@ struct game {
 	unsigned int fall_time;	        /* czas co jaki spada klocek */
 	bool running;			/* czy gra trwa? */
     bool selected;
+    bool marked;
 };
 
 struct game *init_game(void (*)(struct game *), void (*)(struct game *),

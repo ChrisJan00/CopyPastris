@@ -174,8 +174,7 @@ handle_mousedown(struct game *g)
 static void
 handle_mousemove(struct game *g)
 {
-    redraw_all(g);
-    draw_preview(g);
+    mouseHover(g);
 }
 
 static int

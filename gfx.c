@@ -15,7 +15,7 @@ create_surface_wrap(int width, int height, int line, const char *file)
 	SDL_Surface *ret;
 	SDL_PixelFormat *fmt = screen->format;
 
-	ret = SDL_CreateRGBSurface(video_flags, width, height,
+    ret = SDL_CreateRGBSurface(video_flags, width, height,
 	    fmt->BitsPerPixel, fmt->Rmask, fmt->Gmask, fmt->Bmask,
 	    fmt->Amask);
 

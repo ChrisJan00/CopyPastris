@@ -82,6 +82,8 @@ main(int argc, char *argv[])
 	
 	main_loop(g);
 
+    free_blocks();
+
 	return 0;
 }
 

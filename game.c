@@ -22,6 +22,10 @@ static const Uint8 block_color[COLOR_COUNT][3] =
 static SDL_Surface *block[COLOR_COUNT];
 static Uint8 sub0(int, int);
 static Uint8 add0(int, int);
+static SDL_Surface *selectOverlay;
+static SDL_Surface *markOverlay;
+static SDL_Surface *previewOverlay;
+static SDL_Surface *invalidOverlay;
 
 void
 level_up(struct game *g)
@@ -100,14 +104,10 @@ redraw(struct game *g)
 			r.y = p->y + p->size * i;
 
             if (sq[j].visible == true) {
-                if (sq[j].selected) {
-                    SDL_BlitSurface(bground, &r, screen, &r);
-                    SDL_SetAlpha(block[sq[j].color], SDL_SRCALPHA, 0x80);
-                }
 				SDL_BlitSurface(block[sq[j].color], NULL,
 				    screen, &r);
                 if (sq[j].selected)
-                    SDL_SetAlpha(block[sq[j].color], SDL_SRCALPHA, 0xFF);
+                    SDL_BlitSurface(selectOverlay, NULL, screen, &r);
             }
 			else 
 				SDL_BlitSurface(bground, &r, screen, &r);
@@ -143,13 +143,12 @@ draw_tetramino(struct game *g, const int *blocks, int bg, int tc)
 		r.y = p->y + y * p->size;
 
         if (i < tc) {
-            SDL_BlitSurface(bground, &r, screen, &r);
-            if (g->selected)
-                SDL_SetAlpha(block[g->cur_tetramino], SDL_SRCALPHA, 0x80);
 			SDL_BlitSurface(block[g->cur_tetramino], NULL, screen,
 			    &r);
             if (g->selected)
-                SDL_SetAlpha(block[g->cur_tetramino], SDL_SRCALPHA, 0xFF);
+                SDL_BlitSurface(selectOverlay, NULL, screen, &r);
+            else if (g->marked)
+                SDL_BlitSurface(markOverlay, NULL, screen, &r);
         }
 		else
 			SDL_BlitSurface(bground, &r, screen, &r);
@@ -160,16 +159,30 @@ draw_tetramino(struct game *g, const int *blocks, int bg, int tc)
 	SDL_UpdateRects(screen, i, update);
 }
 
-void draw_block(struct game *g, int x, int y, int color, int alpha)
+void draw_block(struct game *g, int x, int y, int color, bool valid)
 {
     SDL_Rect r;
     const struct position *p = g->frontend;
     r.w = r.h = p->size;
     r.x = p->x + x * p->size;
     r.y = p->y + y * p->size;
-    SDL_SetAlpha(block[color], SDL_SRCALPHA, alpha);
     SDL_BlitSurface(block[color], NULL, screen, &r);
-    SDL_SetAlpha(block[color], SDL_SRCALPHA, 0xFF);
+    if (valid)
+        SDL_BlitSurface(previewOverlay, NULL, screen, &r);
+    else
+        SDL_BlitSurface(invalidOverlay, NULL, screen, &r);
+    SDL_UpdateRects(screen, 1, &r);
+}
+
+void draw_block_mark(struct game *g, int x, int y, int color)
+{
+    SDL_Rect r;
+    const struct position *p = g->frontend;
+    r.w = r.h = p->size;
+    r.x = p->x + x * p->size;
+    r.y = p->y + y * p->size;
+    SDL_BlitSurface(block[color], NULL, screen, &r);
+    SDL_BlitSurface(markOverlay, NULL, screen, &r);
     SDL_UpdateRects(screen, 1, &r);
 }
 
@@ -262,8 +275,43 @@ create_color_blocks(int size)
 		SDL_FillRect(block[i], &r, color);
 		r.x = block[i]->w - th; r.y = r.w = th; r.h = block[i]->h - th;
 		SDL_FillRect(block[i], &r, color);
-
 	}
+
+    // overlays
+    Uint32 color;
+    Uint8 alpha = 0x80;
+
+    selectOverlay = create_surface(size, size);
+    color = SDL_MapRGB(block[0]->format, 0, 0, 0xff);
+    SDL_FillRect(selectOverlay, NULL, color);
+    SDL_SetAlpha(selectOverlay, SDL_SRCALPHA, alpha);
+
+    markOverlay = create_surface(size, size);
+    color = SDL_MapRGB(block[0]->format, 0, 0, 0);
+    SDL_FillRect(markOverlay, NULL, color);
+    SDL_SetAlpha(markOverlay, SDL_SRCALPHA, alpha);
+
+    previewOverlay = create_surface(size, size);
+    color = SDL_MapRGB(block[0]->format, 0, 0xff, 0);
+    SDL_FillRect(previewOverlay, NULL, color);
+    SDL_SetAlpha(previewOverlay, SDL_SRCALPHA, alpha);
+
+    invalidOverlay = create_surface(size, size);
+    color = SDL_MapRGB(block[0]->format, 0xff, 0, 0);
+    SDL_FillRect(invalidOverlay, NULL, color);
+    SDL_SetAlpha(invalidOverlay, SDL_SRCALPHA, alpha);
+}
+
+void free_blocks()
+{
+    int i;
+    for (i = 0; i < COLOR_COUNT; ++i)
+        if (block[i] != NULL)
+            SDL_FreeSurface(block[i]);
+    SDL_FreeSurface(selectOverlay);
+    SDL_FreeSurface(markOverlay);
+    SDL_FreeSurface(previewOverlay);
+    SDL_FreeSurface(invalidOverlay);
 }
 
 /* funkcja oblicza gdzie ma sie znajdowac matrix i zwraca strukture z tymi 
