@@ -16,6 +16,7 @@
 #include "xmalloc.h"
 
 #include "autoplay.h"
+#include "mouseinput.h"
 
 /* Wiersze */
 #define W0	0
@@ -180,6 +181,8 @@ rotate_tetramino(struct game *g, bool clockwise)
 	
 	u = update_tetramino(t->rotation[g->rotation], t->rotation[r], 
 	    t->size, t->size);
+    // extra
+    mouseHover(g);
 	g->moved_tetramino(g, u.square, u.background, u.color);
 	g->rotation = r;
 }
@@ -218,6 +221,8 @@ move_tetramino(struct game *g, enum direction d)
 		new_t[i] = t->rotation[g->rotation][i] + d;
 
 	u = update_tetramino(t->rotation[g->rotation], new_t, t->size, t->size);
+    // extra
+    mouseHover(g);
 	g->moved_tetramino(g, u.square, u.background, u.color);
 	g->x = x;
 	g->y = y;
@@ -243,6 +248,8 @@ fast_forward(struct game *g)
 	for (i = 0; i < size; ++i)
 		t[i] = tmino[i] + (y - g->y) * MATRIX_WIDTH;
 
+    // extra
+    mouseHover(g);
 	u = update_tetramino(tmino, t, size, size);
 	g->moved_tetramino(g, u.square, u.background, u.color);
 

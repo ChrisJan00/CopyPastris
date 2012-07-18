@@ -453,6 +453,7 @@ void draw_mark(struct game *g)
 void mark_tmino(struct game *g, int x, int y)
 {
     g->marked = true;
+    Mark.len = 0;
 }
 
 void mark_background(struct game *g, int x, int y)

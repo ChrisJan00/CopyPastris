@@ -48,6 +48,12 @@ void mouseClicked(struct game *g)
     }
 }
 
+int *get_tetraminosquares(struct game *g)
+{
+    const struct tetramino *t = get_tetramino(g->cur_tetramino);
+    return t->rotation[g->rotation];
+}
+
 void mouseHover(struct game *g)
 {
     int clickedx, clickedy;
@@ -59,7 +65,8 @@ void mouseHover(struct game *g)
     g->marked = false;
     if (check_fallingtmino(g, clickedx, clickedy)) {
         mark_tmino(g, clickedx, clickedy);
-        redraw_all(g);
+        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+//        redraw_all(g);
     } else if (check_background(g, clickedx, clickedy)) {
         mark_background(g, clickedx, clickedy);
         draw_mark(g);
