@@ -47,6 +47,7 @@ void restart_buffer(struct game *g)
 
 void manage_copy(struct game *g)
 {
+    undraw_preview(g);
     if (g->selected) {
         push_tetramino(g);
         g->selected = false;
@@ -72,6 +73,7 @@ void manage_paste(struct game *g)
 
 void manage_cut(struct game *g)
 {
+    undraw_preview(g);
     if (g->selected) {
         push_tetramino(g);
         g->visible = false;
