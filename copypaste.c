@@ -29,7 +29,7 @@ static void del_selection(struct game *g);
 static bool
 custom_check_bounds(const int *tmino, int len, int x, int y);
 static void custom_check_lines(struct game *g, int destx, int desty);
-static void unmark_background(struct game *g);
+//static void unmark_background(struct game *g);
 
 void restart_buffer(struct game *g)
 {
@@ -54,7 +54,6 @@ void manage_copy(struct game *g)
     } else if (Selection.len > 0) {
         move_selection_to_buffer(g);
         unselect_background(g);
-//        redraw_all(g);
     }
 }
 
@@ -67,7 +66,6 @@ void manage_paste(struct game *g)
     if (can_pop_tetramino(g, mousex, mousey)) {
         pop_tetramino(g, mousex, mousey);
         custom_check_lines(g, mousex, mousey);
-//        redraw_all(g);
     }
 }
 
@@ -82,7 +80,6 @@ void manage_cut(struct game *g)
     } else if (Selection.len > 0) {
         move_selection_to_buffer(g);
         del_selection(g);
-//        redraw_all(g);
     }
 }
 
@@ -195,18 +192,19 @@ static void recurse_bg(struct game *g, int x, int y)
 
 static void recurse_bg_mark(struct game *g, int x, int y)
 {
-    if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y > MATRIX_HEIGHT)
+    if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT) {
         return;
+    }
 
     int pos = x + y * MATRIX_WIDTH;
     if (g->m[pos].color == Mark.color && g->m[pos].visible && g->m[pos].unvisited) {
         Mark.pos[Mark.len++] = pos;
         g->m[pos].unvisited = false;
         g->m[pos].marked = true;
-        recurse_bg(g, x-1, y);
-        recurse_bg(g, x+1, y);
-        recurse_bg(g, x, y-1);
-        recurse_bg(g, x, y+1);
+        recurse_bg_mark(g, x-1, y);
+        recurse_bg_mark(g, x+1, y);
+        recurse_bg_mark(g, x, y-1);
+        recurse_bg_mark(g, x, y+1);
     }
 }
 
@@ -253,7 +251,6 @@ static void normalize_selection()
 
 static void normalize_mark()
 {
-    return;
     int minx, maxx, miny, maxy;
     int i;
 
@@ -278,6 +275,8 @@ static void normalize_mark()
     }
     Mark.ox = (minx + maxx) / 2;
     Mark.oy = (miny + maxy) / 2;
+//    printf("x:%i(%i-%i),y:%i(%i,%i)\n",Mark.ox,minx,maxx,Mark.oy,miny,maxy);
+//    fflush(0);
     for (i = 0; i < Mark.len; i++) {
         int x = Mark.pos[i] % MATRIX_WIDTH - Mark.ox;
         int y = Mark.pos[i] / MATRIX_WIDTH - Mark.oy;
@@ -483,6 +482,25 @@ void draw_preview(struct game *g, bool force)
     }
 }
 
+void undraw_mark(struct game *g)
+{
+    // no preview
+    if (Mark.len == 0)
+        return;
+
+    // drawing code
+    int i;
+    for (i = 0; i < Mark.len; i++) {
+        int x,y;
+        wrap_coords(Mark.pos[i], Mark.ox, Mark.oy, &x, &y);
+        if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
+            continue;
+        g->m[x+y*MATRIX_WIDTH].marked = false;
+        draw_field(g, x, y, Mark.color);
+    }
+    call_updaterects(g, 0,0,MATRIX_WIDTH,MATRIX_HEIGHT);
+}
+
 void draw_mark(struct game *g)
 {
     // no preview
@@ -493,11 +511,12 @@ void draw_mark(struct game *g)
     int i;
     for (i = 0; i < Mark.len; i++) {
         int x,y;
-        wrap_coords(Buffer.pos[i], Buffer.ox, Buffer.oy, &x, &y);
+        wrap_coords(Mark.pos[i], Mark.ox, Mark.oy, &x, &y);
         if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
             continue;
         draw_block_mark(g, x, y, Mark.color);
     }
+    call_updaterects(g, 0,0,MATRIX_WIDTH,MATRIX_HEIGHT);
 }
 
 void mark_tmino(struct game *g, int x, int y)
@@ -515,13 +534,27 @@ void mark_background(struct game *g, int x, int y)
 
     Mark.color = g->m[pos].color;
     prepare_selection(g);
+    Mark.len = 0;
     recurse_bg_mark(g, x, y);
-//    normalize_selection();
-    Mark.ox = 0;
-    Mark.oy = 0;
+//    int i;
+//    for (i=0;i<Mark.len;i++) {
+//        int ax,ay;
+//        wrap_coords(Mark.pos[i],Mark.ox,Mark.oy,&ax,&ay);
+//        printf("b4.%i: %i(%i,%i),%i(%i,%i)\n",i,ax,Mark.pos[i]%MATRIX_WIDTH,Mark.ox,ay,Mark.pos[i]/MATRIX_WIDTH,Mark.oy);
+//    }
+//    fflush(0);
+    normalize_mark();
+//    for (i=0;i<Mark.len;i++) {
+//        int ax,ay;
+//        wrap_coords(Mark.pos[i],Mark.ox,Mark.oy,&ax,&ay);
+//        printf("af.%i: %i(%i,%i),%i(%i,%i)\n",i,ax,Mark.pos[i]%MATRIX_WIDTH,Mark.ox,ay,Mark.pos[i]/MATRIX_WIDTH,Mark.oy);
+//    }
+//    fflush(0);
+//    Mark.ox = 0;
+//    Mark.oy = 0;
 }
 
-static void unmark_background(struct game *g)
+void unmark_background(struct game *g)
 {
     if (Mark.len == 0)
         return;
@@ -530,8 +563,6 @@ static void unmark_background(struct game *g)
     for (i=0; i<Mark.len; i++) {
         int x,y;
         wrap_coords(Mark.pos[i], Mark.ox, Mark.oy, &x, &y);
-//        int x = Mark.pos[i] % MATRIX_WIDTH + Mark.ox;
-//        int y = Mark.pos[i] / MATRIX_WIDTH + Mark.oy;
         int pos = x + y * MATRIX_WIDTH;
         g->m[pos].marked = false;
     }

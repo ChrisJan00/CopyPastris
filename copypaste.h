@@ -17,4 +17,7 @@ void mark_background(struct game *g, int x, int y);
 
 bool draw_preview_in_pos(struct game *g, int x, int y);
 
+void unmark_background(struct game *g);
+void undraw_mark(struct game *g);
+void draw_mark(struct game *g);
 #endif

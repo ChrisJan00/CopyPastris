@@ -66,14 +66,20 @@ void mouseHover(struct game *g)
     if (check_fallingtmino(g, clickedx, clickedy)) {
         mark_tmino(g, clickedx, clickedy);
         undraw_preview(g);
+        undraw_mark(g);
+        unmark_background(g);
         draw_tetramino(g, get_tetraminosquares(g), 0, 4);
 //        redraw_all(g);
     } else if (check_background(g, clickedx, clickedy)) {
         undraw_preview(g);
+        undraw_mark(g);
+        unmark_background(g);
         mark_background(g, clickedx, clickedy);
         draw_tetramino(g, get_tetraminosquares(g), 0, 4);
-//        draw_mark(g);
+        draw_mark(g);
     } else {
+        undraw_mark(g);
+        unmark_background(g);
         draw_preview(g, false);
         draw_tetramino(g, get_tetraminosquares(g), 0, 4);
     }

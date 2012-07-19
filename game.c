@@ -108,6 +108,8 @@ redraw(struct game *g)
 				    screen, &r);
                 if (sq[j].selected)
                     SDL_BlitSurface(selectOverlay, NULL, screen, &r);
+                else if (sq[j].marked)
+                    SDL_BlitSurface(markOverlay, NULL, screen, &r);
             }
 			else 
 				SDL_BlitSurface(bground, &r, screen, &r);
@@ -213,8 +215,13 @@ void draw_field(struct game *g, int x, int y)
 
     int pos = x + y * MATRIX_WIDTH;
 
-    if (g->m[pos].visible)
+    if (g->m[pos].visible) {
         SDL_BlitSurface(block[g->m[pos].color], NULL, screen, &r);
+        if (g->m[pos].selected)
+            SDL_BlitSurface(selectOverlay, NULL, screen, &r);
+        else if (g->m[pos].marked)
+            SDL_BlitSurface(markOverlay, NULL, screen, &r);
+    }
     else
         SDL_BlitSurface(bground, &r, screen, &r);
 }
