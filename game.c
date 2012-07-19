@@ -143,15 +143,18 @@ draw_tetramino(struct game *g, const int *blocks, int bg, int tc)
 		r.y = p->y + y * p->size;
 
         if (i < tc) {
-			SDL_BlitSurface(block[g->cur_tetramino], NULL, screen,
-			    &r);
-            if (g->selected)
-                SDL_BlitSurface(selectOverlay, NULL, screen, &r);
-            else if (g->marked)
-                SDL_BlitSurface(markOverlay, NULL, screen, &r);
+            if (g->visible) {
+                SDL_BlitSurface(block[g->cur_tetramino], NULL, screen, &r);
+                if (g->selected)
+                    SDL_BlitSurface(selectOverlay, NULL, screen, &r);
+                else if (g->marked)
+                    SDL_BlitSurface(markOverlay, NULL, screen, &r);
+            } else
+                SDL_BlitSurface(bground, &r, screen, &r);
         }
 		else
-			SDL_BlitSurface(bground, &r, screen, &r);
+            if (!draw_preview_in_pos(g, x, y))
+                SDL_BlitSurface(bground, &r, screen, &r);
 
 		update[i] = r;
 	}
@@ -183,7 +186,37 @@ void draw_block_mark(struct game *g, int x, int y, int color)
     r.y = p->y + y * p->size;
     SDL_BlitSurface(block[color], NULL, screen, &r);
     SDL_BlitSurface(markOverlay, NULL, screen, &r);
-    SDL_UpdateRects(screen, 1, &r);
+//    SDL_UpdateRects(screen, 1, &r);
+}
+
+void call_updaterects(struct game *g, int x, int y, int w, int h)
+{
+    if (w < 1 || h < 1)
+        return;
+
+    const struct position *p = g->frontend;
+    SDL_Rect r;
+    r.x = p->x + x * p->size;
+    r.y = p->y + y * p->size;
+    r.w = w * p->size;
+    r.h = h * p->size;
+    SDL_UpdateRect(screen, r.x, r.y, r.w, r.h);
+}
+
+void draw_field(struct game *g, int x, int y)
+{
+    SDL_Rect r;
+    const struct position *p = g->frontend;
+    r.w = r.h = p->size;
+    r.x = p->x + x * p->size;
+    r.y = p->y + y * p->size;
+
+    int pos = x + y * MATRIX_WIDTH;
+
+    if (g->m[pos].visible)
+        SDL_BlitSurface(block[g->m[pos].color], NULL, screen, &r);
+    else
+        SDL_BlitSurface(bground, &r, screen, &r);
 }
 
 /*

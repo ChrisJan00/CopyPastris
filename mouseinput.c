@@ -42,7 +42,7 @@ void mouseClicked(struct game *g)
     // falling tetramino
     if (check_fallingtmino(g, clickedx, clickedy)) {
         select_tmino(g, clickedx, clickedy);
-        redraw_all(g);
+//        redraw_all(g);
     } else if (check_background(g, clickedx, clickedy)) {
         select_background(g, clickedx, clickedy);
     }
@@ -65,13 +65,39 @@ void mouseHover(struct game *g)
     g->marked = false;
     if (check_fallingtmino(g, clickedx, clickedy)) {
         mark_tmino(g, clickedx, clickedy);
+        undraw_preview(g);
         draw_tetramino(g, get_tetraminosquares(g), 0, 4);
 //        redraw_all(g);
     } else if (check_background(g, clickedx, clickedy)) {
+        undraw_preview(g);
         mark_background(g, clickedx, clickedy);
-        draw_mark(g);
+        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+//        draw_mark(g);
     } else {
-        draw_preview(g);
+        draw_preview(g, false);
+        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+    }
+}
+
+void recheckMouse(struct game *g)
+{
+    int clickedx, clickedy;
+
+    if (!get_mousecoords(g, &clickedx, &clickedy))
+        return;
+
+    // falling tetramino
+    g->marked = false;
+    if (check_fallingtmino(g, clickedx, clickedy)) {
+        mark_tmino(g, clickedx, clickedy);
+    } else if (check_background(g, clickedx, clickedy)) {
+        mark_background(g, clickedx, clickedy);
+    } else {
+        draw_preview(g, true);
+        // still, the moving tetramino will undraw itself here...
+        // I think I should start doing the layer stuff
+
+//        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
     }
 }
 

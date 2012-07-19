@@ -10,8 +10,11 @@ void manage_cut(struct game *g);
 
 void select_tmino(struct game *g, int x, int y);
 void select_background(struct game *g, int x, int y);
-void draw_preview(struct game *g);
+void undraw_preview(struct game *g);
+void draw_preview(struct game *g, bool force);
 void mark_tmino(struct game *g, int x, int y);
 void mark_background(struct game *g, int x, int y);
+
+bool draw_preview_in_pos(struct game *g, int x, int y);
 
 #endif

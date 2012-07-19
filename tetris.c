@@ -182,7 +182,7 @@ rotate_tetramino(struct game *g, bool clockwise)
 	u = update_tetramino(t->rotation[g->rotation], t->rotation[r], 
 	    t->size, t->size);
     // extra
-    mouseHover(g);
+    recheckMouse(g);
 	g->moved_tetramino(g, u.square, u.background, u.color);
 	g->rotation = r;
 }
@@ -222,7 +222,7 @@ move_tetramino(struct game *g, enum direction d)
 
 	u = update_tetramino(t->rotation[g->rotation], new_t, t->size, t->size);
     // extra
-    mouseHover(g);
+    recheckMouse(g);
 	g->moved_tetramino(g, u.square, u.background, u.color);
 	g->x = x;
 	g->y = y;
@@ -248,9 +248,8 @@ fast_forward(struct game *g)
 	for (i = 0; i < size; ++i)
 		t[i] = tmino[i] + (y - g->y) * MATRIX_WIDTH;
 
-    // extra
-    mouseHover(g);
 	u = update_tetramino(tmino, t, size, size);
+    recheckMouse(g);
 	g->moved_tetramino(g, u.square, u.background, u.color);
 
 	g->y = y;
@@ -273,6 +272,8 @@ new_tetramino(struct game *g)
 	g->next_rotation = get_random(0, t->rotations);
 
     g->selected = false;
+    g->marked = false;
+    g->visible = true;
 
 	if (g->preview)
 		g->preview(g, t->rotation[g->next_rotation], t->size);

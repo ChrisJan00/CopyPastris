@@ -67,6 +67,7 @@ struct game {
 	bool running;			/* czy gra trwa? */
     bool selected;
     bool marked;
+    bool visible;
 };
 
 struct game *init_game(void (*)(struct game *), void (*)(struct game *),

@@ -6,5 +6,7 @@
 bool get_mousecoords(struct game *g, int *clickedx, int *clickedy);
 void mouseHover(struct game *g);
 void mouseClicked(struct game *g);
+void recheckMouse(struct game *g);
+int *get_tetraminosquares(struct game *g);
 
 #endif
