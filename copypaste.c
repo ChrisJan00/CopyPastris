@@ -31,6 +31,8 @@ custom_check_bounds(const int *tmino, int len, int x, int y);
 static void custom_check_lines(struct game *g, int destx, int desty);
 //static void unmark_background(struct game *g);
 
+bool preview_visible;
+
 void restart_buffer(struct game *g)
 {
     Buffer.len = 0;
@@ -581,4 +583,58 @@ bool draw_preview_in_pos(struct game *g, int x, int y)
         }
     }
     return false;
+}
+
+void redraw_field(struct game *g)
+{
+    // no need to undraw/redraw shit
+
+    int i;
+
+    // first prepare visitation matrix
+    for (i=0; i < MATRIX_SIZE; i++) {
+        g->m[i].unvisited = true;
+    }
+
+    // cut out falling tetramino
+    const struct tetramino *t = get_tetramino(g->cur_tetramino);
+    int *tmino_squares = t->rotation[g->rotation];
+    int mpos = g->x + g->y * MATRIX_WIDTH;
+    for (i=0; i < t->size; i++) {
+        int tpos = mpos + tmino_squares[i];
+        if (tpos >= 0 && tpos < MATRIX_SIZE)
+            g->m[tpos].unvisited = false;
+    }
+
+    // cut out preview
+    if (preview_visible) {
+        for (i=0; i<Buffer.len; i++) {
+            int x,y;
+            wrap_coords(Buffer.pos[i], Buffer.ox, Buffer.oy, &x, &y);
+            if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
+                continue;
+            if (!g->m[x * MATRIX_WIDTH + y].visible)
+                g->m[x * MATRIX_WIDTH + y].unvisited = false;
+        }
+    }
+
+
+    // draw the whole field on top of the current
+    for (i=0; i < MATRIX_SIZE; i++) {
+        if (g->m[i].unvisited)
+            draw_field(g, i%MATRIX_WIDTH, i/MATRIX_WIDTH);
+    }
+
+    // draw the preview
+    if (preview_visible)
+        draw_preview(g, true);
+
+    // draw the moving piece
+    draw_tetramino(g, tmino_squares, 0, t->size);
+    preview_visible = false;
+}
+
+void make_preview_visible(struct game *g)
+{
+    preview_visible = true;
 }

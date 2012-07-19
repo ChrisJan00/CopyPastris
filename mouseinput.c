@@ -65,24 +65,26 @@ void mouseHover(struct game *g)
     g->marked = false;
     if (check_fallingtmino(g, clickedx, clickedy)) {
         mark_tmino(g, clickedx, clickedy);
-        undraw_preview(g);
-        undraw_mark(g);
+//        undraw_preview(g);
+//        undraw_mark(g);
         unmark_background(g);
-        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+//        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
 //        redraw_all(g);
     } else if (check_background(g, clickedx, clickedy)) {
-        undraw_preview(g);
-        undraw_mark(g);
+//        undraw_preview(g);
+//        undraw_mark(g);
         unmark_background(g);
         mark_background(g, clickedx, clickedy);
-        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
-        draw_mark(g);
+//        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+//        draw_mark(g);
     } else {
-        undraw_mark(g);
-        unmark_background(g);
-        draw_preview(g, false);
-        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+//        undraw_mark(g);
+//        unmark_background(g);
+//        draw_preview(g, false);
+//        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+        make_preview_visible(g);
     }
+    redraw_field(g);
 }
 
 void recheckMouse(struct game *g)
@@ -99,12 +101,14 @@ void recheckMouse(struct game *g)
     } else if (check_background(g, clickedx, clickedy)) {
         mark_background(g, clickedx, clickedy);
     } else {
-        draw_preview(g, true);
+//        draw_preview(g, true);
         // still, the moving tetramino will undraw itself here...
         // I think I should start doing the layer stuff
 
 //        draw_tetramino(g, get_tetraminosquares(g), 0, 4);
+        make_preview_visible(g);
     }
+    redraw_field(g);
 }
 
 static bool check_fallingtmino(struct game *g, int x, int y)

@@ -20,4 +20,7 @@ bool draw_preview_in_pos(struct game *g, int x, int y);
 void unmark_background(struct game *g);
 void undraw_mark(struct game *g);
 void draw_mark(struct game *g);
+
+void redraw_field(struct game *g);
+void make_preview_visible(struct game *g);
 #endif
