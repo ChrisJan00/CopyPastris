@@ -608,6 +608,7 @@ void redraw_field(struct game *g)
 
     // cut out preview
     if (preview_visible) {
+//        printf("drawp\n");fflush(0);
         for (i=0; i<Buffer.len; i++) {
             int x,y;
             wrap_coords(Buffer.pos[i], Buffer.ox, Buffer.oy, &x, &y);
@@ -631,10 +632,13 @@ void redraw_field(struct game *g)
 
     // draw the moving piece
     draw_tetramino(g, tmino_squares, 0, t->size);
-    preview_visible = false;
+    call_updaterects(g, 0, 0, MATRIX_WIDTH, MATRIX_HEIGHT);
+
 }
 
-void make_preview_visible(struct game *g)
+void change_preview_visible(struct game *g, bool visible)
 {
-    preview_visible = true;
+//    printf("preview_visible %s\n",visible?"true":"false");
+//    fflush(0);
+    preview_visible = visible;
 }
