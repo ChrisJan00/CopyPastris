@@ -46,6 +46,7 @@ void mouseClicked(struct game *g)
     } else if (check_background(g, clickedx, clickedy)) {
         select_background(g, clickedx, clickedy);
     }
+    redraw_field(g);
 }
 
 int *get_tetraminosquares(struct game *g)

@@ -219,7 +219,6 @@ static void prepare_selection(struct game *g)
 
 static void normalize_selection()
 {
-    return;
     int minx, maxx, miny, maxy;
     int i;
 
@@ -277,8 +276,6 @@ static void normalize_mark()
     }
     Mark.ox = (minx + maxx) / 2;
     Mark.oy = (miny + maxy) / 2;
-//    printf("x:%i(%i-%i),y:%i(%i,%i)\n",Mark.ox,minx,maxx,Mark.oy,miny,maxy);
-//    fflush(0);
     for (i = 0; i < Mark.len; i++) {
         int x = Mark.pos[i] % MATRIX_WIDTH - Mark.ox;
         int y = Mark.pos[i] / MATRIX_WIDTH - Mark.oy;
@@ -307,8 +304,8 @@ static void move_mark_to_selection(struct game *g)
     Selection.isTetramino = false;
     Selection.color = Mark.color;
     Selection.len = Mark.len;
-    Selection.ox = -1;
-    Selection.oy = -1;
+    Selection.ox = Mark.ox;
+    Selection.oy = Mark.oy;
 }
 
 static void del_selection(struct game *g)
@@ -479,6 +476,7 @@ void draw_preview(struct game *g, bool force)
             wrap_coords(Buffer.pos[i], Buffer.ox, Buffer.oy, &x, &y);
             if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
                 continue;
+
             draw_block(g, x, y, Buffer.color, Buffer.valid);
         }
     }
