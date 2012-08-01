@@ -11,7 +11,6 @@ SOURCES += main.c \
     tetris.c \
     random.c \
     mainloop.c \
-    highscores.c \
     gfx.c \
     game.c \
     autoplay.c \
@@ -28,7 +27,6 @@ HEADERS += \
     tetris.h \
     random.h \
     mainloop.h \
-    highscores.h \
     gfx.h \
     game.h \
     common.h \

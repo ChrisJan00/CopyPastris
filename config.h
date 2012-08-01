@@ -10,16 +10,16 @@
 #define HAVE_STDBOOL_H 1
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "SDL Tetris Clone"
+#define PACKAGE_NAME "Copypastris"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "SDL Tetris Clone 0.93"
+#define PACKAGE_STRING "Copypastris 0.1"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "sdl-tetris-clone"
+#define PACKAGE_TARNAME "copypastris"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.93"
+#define PACKAGE_VERSION "0.1"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

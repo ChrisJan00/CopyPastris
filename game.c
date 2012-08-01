@@ -2,7 +2,7 @@
 
 #include <SDL/SDL.h>
 
-#include "highscores.h"
+//#include "highscores.h"
 #include "game.h"
 #include "gfx.h"
 #include "mainloop.h"
@@ -55,6 +55,19 @@ level_up(struct game *g)
 		g->fall_time /= 2;
 }
 
+void drawInstructions(struct game *g)
+{
+    SDL_Rect r;
+    struct position *p = g->frontend;
+
+    r.x = p->x2;
+    r.y = p->y2 + p->size * PREVIEW_H + 60;
+    char instMsg[1024];
+    sprintf(instMsg,"\nCopypastris\nby Christiaan Janssen\nRemixed from sdltetris (sourceforge)\nBerlin 5h microJam 2012\n\nInstructions:\nMouse:    select on click\nCTRL+X:   cut\nCTRL+C:   copy\nCTRL+V:   paste");
+    sf_puts(screen, &r, instMsg);
+    SDL_UpdateRects(screen, 1, &r);
+}
+
 void
 gameover(struct game *g)
 {
@@ -68,28 +81,25 @@ gameover(struct game *g)
 #endif
 	pph = g->points * 3600.f / (time(NULL) - g->game_time);
 
-	if (high_score(g->lines_cleared, g->points, pph)) {
-		char buf[20];
+    r.x = p->x + 10;
+    r.y = p->y + p->size * PREVIEW_H + 60;
+    char endMsg[1024];
+    sprintf(endMsg,"GAME OVER\nYour Score: %i\nPress any key",g->points,g->lines_cleared,g->level);
+    sf_puts(screen, &r, endMsg);
+    SDL_UpdateRects(screen, 1, &r);
 
-		r.x = p->x2;
-		r.y = p->y2 + p->size * PREVIEW_H + 60;
-		sf_puts(screen, &r, "Highscore, congratulations!\n"
-		    "Please enter your name:");
-		SDL_UpdateRects(screen, 1, &r);
+    r.y += r.h;
 
-		r.y += r.h;
+    SDL_Event e;
+    while (SDL_PollEvent(&e) == 0 || e.type != SDL_KEYDOWN) {
+        SDL_Delay(100);
+    }
 
-		sf_gets(bground, &r, buf, sizeof(buf));
-		if (*buf == '\0')
-			strcpy(buf, "Anonymous");
-		write_scores(buf, g->lines_cleared, g->points, pph);
-	}
 
 #if 0	
 	g->running = false;
 #endif
-	restart_game(g);
-	draw_hscores(g);
+    restart_game(g);
 }
 
 /* funkcja rysuje caly matrix */

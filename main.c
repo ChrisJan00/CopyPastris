@@ -69,7 +69,7 @@ main(int argc, char *argv[])
 	fill_gradient(bground);
 	/* TODO: zrobic to ansi C kompatybilne */
 	sf_puts(bground, &(SDL_Rect){.x = 20, .y = SCREEN_HEIGHT - 20},
-	    "ESC - quit, S - new game, F - fullscreen, H - scores");
+        "ESC - quit, S - new game, F - fullscreen");
 
 	p = compute_pos(SCREEN_WIDTH, SCREEN_HEIGHT);
 	draw_matrix_border(&p);
@@ -79,7 +79,8 @@ main(int argc, char *argv[])
 
 	g = init_game(redraw, level_up, gameover, draw_tetramino, 
 	    tetramino_preview, &p, 1);
-	
+
+    drawInstructions(g);
 	main_loop(g);
 
     free_blocks();

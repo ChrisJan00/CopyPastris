@@ -3,7 +3,7 @@
 #include <SDL/SDL.h>
 
 #include "game.h"
-#include "highscores.h"
+//#include "highscores.h"
 #include "mainloop.h"
 #include "tetris.h"
 #include "text.h"
@@ -97,9 +97,9 @@ handle_keyboard(const SDL_keysym *k, struct game *g)
     case SDLK_f:
         SDL_WM_ToggleFullScreen(screen);
         break;
-    case SDLK_h:
-        draw_hscores(g);
-        return;
+//    case SDLK_h:
+//        draw_hscores(g);
+//        return;
 #ifdef DEBUG
     case SDLK_a:
         fprintf(stderr, "Abort requested by user.\nAborting.\n");
@@ -189,67 +189,67 @@ event_filter(const SDL_Event *e)
 }
 
 
-void
-draw_hscores(struct game *g)
-{
-    extern SDL_Surface *bground;
-    SDL_Rect pos;
-    const char **text;
-    enum top t;
+//void
+//draw_hscores(struct game *g)
+//{
+//    extern SDL_Surface *bground;
+//    SDL_Rect pos;
+//    const char **text;
+////    enum top t;
 
-    pos.x = 100;
+//    pos.x = 100;
 
-    for (t = TOP_LINES;; t + 1 >= TOP_COUNT ? t = TOP_LINES : ++t) {
-        const char *caption[TOP_COUNT] = {
-            "Highest line scores:",
-            "Best points:",
-            "Best speed:"
-        };
-        /* format taki jak linia wyniku (funkcja write_score_line) */
-        const char *fmt = "%-20s %4s %4s %4s %s\n";
-        SDL_Event e;
+//    for (t = TOP_LINES;; t + 1 >= TOP_COUNT ? t = TOP_LINES : ++t) {
+//        const char *caption[TOP_COUNT] = {
+//            "Highest line scores:",
+//            "Best points:",
+//            "Best speed:"
+//        };
+//        /* format taki jak linia wyniku (funkcja write_score_line) */
+//        const char *fmt = "%-20s %4s %4s %4s %s\n";
+//        SDL_Event e;
 
-        /* czyszcze wszystko */
-        SDL_BlitSurface(bground, NULL, screen, NULL);
+//        /* czyszcze wszystko */
+//        SDL_BlitSurface(bground, NULL, screen, NULL);
 
-        pos.y = 100;
-        sf_printf(screen, &pos, fmt, caption[t], "lines", "points",
-                  "pph", "date");
+//        pos.y = 100;
+//        sf_printf(screen, &pos, fmt, caption[t], "lines", "points",
+//                  "pph", "date");
 
-        pos.y += pos.h;
-        for (text = get_top_scores(t); *text; ++text) {
-            char *eol;
+//        pos.y += pos.h;
+//        for (text = get_top_scores(t); *text; ++text) {
+//            char *eol;
 
-            if (eol = strchr(*text, '\n'))
-                *eol = '\0';
+//            if (eol = strchr(*text, '\n'))
+//                *eol = '\0';
 
-            sf_puts(screen, &pos, *text);
-            pos.y += pos.h;
-        }
-        SDL_Flip(screen);
+//            sf_puts(screen, &pos, *text);
+//            pos.y += pos.h;
+//        }
+//        SDL_Flip(screen);
 
-        for (;;) {
-            if (SDL_PollEvent(&e) && e.type == SDL_KEYDOWN)
-                switch(e.key.keysym.sym) {
-                case SDLK_s:
-                    restart_game(g);
-                    goto RET;
-                case SDLK_f:
-                    SDL_WM_ToggleFullScreen(screen);
-                    break;
-                case SDLK_ESCAPE:
-                case SDLK_q:
-                    goto RET;
-                default:
-                    goto CNT;
-                }
-            SDL_Delay(5);
-        }
-CNT:
-        ;
-    } /* for */
-RET:
-    SDL_BlitSurface(bground, NULL, screen, NULL);
-    SDL_Flip(screen);
-    redraw_all(g);
-}
+//        for (;;) {
+//            if (SDL_PollEvent(&e) && e.type == SDL_KEYDOWN)
+//                switch(e.key.keysym.sym) {
+//                case SDLK_s:
+//                    restart_game(g);
+//                    goto RET;
+//                case SDLK_f:
+//                    SDL_WM_ToggleFullScreen(screen);
+//                    break;
+//                case SDLK_ESCAPE:
+//                case SDLK_q:
+//                    goto RET;
+//                default:
+//                    goto CNT;
+//                }
+//            SDL_Delay(5);
+//        }
+//CNT:
+//        ;
+//    } /* for */
+//RET:
+//    SDL_BlitSurface(bground, NULL, screen, NULL);
+//    SDL_Flip(screen);
+//    redraw_all(g);
+//}

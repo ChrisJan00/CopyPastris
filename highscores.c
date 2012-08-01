@@ -12,6 +12,9 @@
 
 #define DATE_LEN	26		/* czemu tyle? man ctime */
 
+// yes, it can buffer-overflow, but whatever
+char scoreString[LINE_LEN * TOP_SCORES];
+
 /*
  * INFO: niechaj linia w pliku z najlepszymi wynikami wyglada tak:
  * imie_gracza	linie	punkty	pph
@@ -26,7 +29,8 @@ static const char *fnames[] = {
 };
 
 static bool string_to_scores(const char *, int *, int *, int *);
-static void write_score_line(FILE *f, const char *, int, int, int);
+static void write_score_line(char *s, const char *, int, int, int);
+
 
 /*
  * funkcja zwraca tablice stringow z najlepszymi wynikami, ostatni element
@@ -35,18 +39,18 @@ static void write_score_line(FILE *f, const char *, int, int, int);
 const char **
 get_top_scores(enum top list)
 {
-	static char *scores[TOP_SCORES + 1];
-	static char score_line[LINE_LEN * TOP_SCORES];
-	FILE *f;
+    static char *scores[TOP_SCORES + 1];
+    static char score_line[LINE_LEN * TOP_SCORES];
+    char *s;
 	int i;
 
 	for (i = 0; i < TOP_SCORES; ++i)
 		scores[i] = &score_line[i * LINE_LEN];
 
-	if ((f = fopen(fnames[list], "r")) == NULL) {
-		scores[0] = NULL;
-		return (const char **)scores;
-	}
+//	if ((f = fopen(fnames[list], "r")) == NULL) {
+//		scores[0] = NULL;
+//		return (const char **)scores;
+//	}
 
 	for (i = 0; i < TOP_SCORES; ++i)
 		/* TODO: napisac jakas funkcje typu getline */
@@ -113,70 +117,69 @@ high_score(int lines, int points, int pph)
 void
 write_scores(const char *name, const int lines, const int points, const int pph)
 {
-	enum top t;
-	int lcpy = lines, pcpy = points, pphcpy = pph;
+    enum top t;
+    int lcpy = lines, pcpy = points, pphcpy = pph;
 
-	for (t = TOP_LINES; t < TOP_COUNT; ++t) {
-		const char **scores = get_top_scores(t);
-		int *cur_score;
-		FILE *f;
-		int score_count;
+    for (t = TOP_LINES; t < TOP_COUNT; ++t) {
+        const char **scores = get_top_scores(t);
+        int *cur_score;
+        int score_count;
 
-		if ((f = fopen(fnames[t], "w")) == NULL)
-			ERROR("Can't open file for writing: %s\n", fnames[t]);
+        if ((f = fopen(fnames[t], "w")) == NULL)
+            ERROR("Can't open file for writing: %s\n", fnames[t]);
 
-		if (scores[0] == NULL) {
-			write_score_line(f, name, lines, points, pph);
-			goto CNT;
-		}
+        if (scores[0] == NULL) {
+            write_score_line(f, name, lines, points, pph);
+            goto CNT;
+        }
 
-		for (score_count = 0; *scores; ++scores, ++score_count) {
-			int hl, hp, hpph;
-			int *high_score;
+        for (score_count = 0; *scores; ++scores, ++score_count) {
+            int hl, hp, hpph;
+            int *high_score;
 
-			if (!string_to_scores(*scores, &hl, &hp, &hpph))
-				continue;
+            if (!string_to_scores(*scores, &hl, &hp, &hpph))
+                continue;
 
-			switch (t) {
-			case TOP_LINES:
-				cur_score = &lcpy;
-				high_score = &hl;
-				break;
-			case TOP_POINTS:
-				cur_score = &pcpy;
-				high_score = &hp;
-				break;
-			case TOP_PPH:
-				cur_score = &pphcpy;
-				high_score = &hpph;
-				break;
-			default:
-				ERROR("unknow enumeration: %d\n", t);
-			}
+            switch (t) {
+            case TOP_LINES:
+                cur_score = &lcpy;
+                high_score = &hl;
+                break;
+            case TOP_POINTS:
+                cur_score = &pcpy;
+                high_score = &hp;
+                break;
+            case TOP_PPH:
+                cur_score = &pphcpy;
+                high_score = &hpph;
+                break;
+            default:
+                ERROR("unknow enumeration: %d\n", t);
+            }
 
-			/* jezeli aktualny wynik gracza jest lepszy
-			 * to wpisujemy go na to miejsce */
-			if (*cur_score >= *high_score) {
-				write_score_line(f, name, lines, points, pph);
-				*cur_score = -1;
-			} 
+            /* jezeli aktualny wynik gracza jest lepszy
+             * to wpisujemy go na to miejsce */
+            if (*cur_score >= *high_score) {
+                write_score_line(f, name, lines, points, pph);
+                *cur_score = -1;
+            }
 			
-			{
-				char *eol = strchr(*scores, '\n');
-				if (eol)
-					*eol = '\0';
-			}
-			fprintf(f, "%s\n", *scores);
-		} /* inner lop */
+            {
+                char *eol = strchr(*scores, '\n');
+                if (eol)
+                    *eol = '\0';
+            }
+            fprintf(f, "%s\n", *scores);
+        } /* inner lop */
 
-		/* jesli lista jest krotsza niz TOP_SCORES i aktualny
-		 * wynik nie byl jeszcze zapisany to go zapisuje */
-		if (score_count < TOP_SCORES && *cur_score > -1)
-			write_score_line(f, name, lines, points, pph);
+        /* jesli lista jest krotsza niz TOP_SCORES i aktualny
+         * wynik nie byl jeszcze zapisany to go zapisuje */
+        if (score_count < TOP_SCORES && *cur_score > -1)
+            write_score_line(f, name, lines, points, pph);
 
 CNT:
-		fclose(f);
-	}
+        fclose(f);
+    }
 }
 			
 static bool
@@ -191,7 +194,7 @@ string_to_scores(const char *str, int *lines, int *points, int *pph)
 }
 
 static void
-write_score_line(FILE *f, const char *name, int lines, int points, int pph)
+write_score_line(char *s, const char *name, int lines, int points, int pph)
 {
 	char date[DATE_LEN + 1];
 	time_t d;

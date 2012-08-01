@@ -28,33 +28,33 @@ static int descent;			/* najnizszy punkt w foncie */
 void
 init_font(const char *fp)
 {
-	TTF_Font *font;
-	SDL_Color fg = {255, 255, 255, 0};
-	int i;
+    TTF_Font *font;
+    SDL_Color fg = {255, 255, 255, 0};
+    int i;
 
-	if (TTF_Init() == -1)
-		ERROR("TTF_Init: %s\n", TTF_GetError());
+    if (TTF_Init() == -1)
+        ERROR("TTF_Init: %s\n", TTF_GetError());
 
-	if ((font = TTF_OpenFont(fp, FONT_SIZE)) == NULL) 
-		ERROR("TTF_OpenFont: %s\nFont path: %s\n", TTF_GetError(), fp);
+    if ((font = TTF_OpenFont(fp, FONT_SIZE)) == NULL)
+        ERROR("TTF_OpenFont: %s\nFont path: %s\n", TTF_GetError(), fp);
 
-	for (i = ASCII_BEGIN; i < ASCII_END; ++i) {
-		const int idx = i - ASCII_BEGIN;
-		chars[idx] = TTF_RenderGlyph_Blended(font, i, fg);
+    for (i = ASCII_BEGIN; i < ASCII_END; ++i) {
+        const int idx = i - ASCII_BEGIN;
+        chars[idx] = TTF_RenderGlyph_Blended(font, i, fg);
 
-		if (chars[idx] == NULL)
-			ERROR("%s\nGlyph: %d = '%c'\n", TTF_GetError(), i, i);
+        if (chars[idx] == NULL)
+            ERROR("%s\nGlyph: %d = '%c'\n", TTF_GetError(), i, i);
 
-		if (TTF_GlyphMetrics(font, i, NULL, NULL, NULL, &met[idx].max_y,
-		    &met[idx].advance) == -1)
-			ERROR("%s\n", TTF_GetError());
+        if (TTF_GlyphMetrics(font, i, NULL, NULL, NULL, &met[idx].max_y,
+            &met[idx].advance) == -1)
+            ERROR("%s\n", TTF_GetError());
 
-		ascent = TTF_FontAscent(font);
-		descent = TTF_FontDescent(font);
-	}
+        ascent = TTF_FontAscent(font);
+        descent = TTF_FontDescent(font);
+    }
 
-	TTF_CloseFont(font);
-	TTF_Quit();
+    TTF_CloseFont(font);
+    TTF_Quit();
 }
 
 /*
