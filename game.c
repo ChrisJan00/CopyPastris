@@ -14,9 +14,14 @@ extern SDL_Surface *screen;
 extern SDL_Surface *bground;
 /* wzorzec koloru kafla odpowiadajacy enumeratorowi "enum color" z tetris.h */
 static const Uint8 block_color[COLOR_COUNT][3] =
-{{230, 30, 30}, {120, 120, 120}, {30, 230, 230},
- {230, 230, 30}, {230, 30, 240}, {30, 30, 230},
- {30, 230, 30}};
+ { {0x92, 0x3c, 0xcf},
+  {0x84, 0x53, 0x8c},
+  {0xad, 0x69, 0xad},
+  {0x7b, 0x34, 0x89},
+  {0x80, 0x39, 0x8c},
+  {0x8c, 0x39, 0x6b},
+  {0x86, 0x32, 0xc3} };
+
 /* tablica klockow z ktorych beda rysowane tetramino, kolor elementu tablicy
  * odpowiada enumeratorowi "enum color" */
 static SDL_Surface *block[COLOR_COUNT];
@@ -323,7 +328,7 @@ create_color_blocks(int size)
     Uint8 alpha = 0x80;
 
     selectOverlay = create_surface(size, size);
-    color = SDL_MapRGB(block[0]->format, 0, 0, 0xff);
+    color = SDL_MapRGB(block[0]->format, 0, 0x80, 0xff);
     SDL_FillRect(selectOverlay, NULL, color);
     SDL_SetAlpha(selectOverlay, SDL_SRCALPHA, alpha);
 
@@ -397,7 +402,8 @@ draw_matrix_border(const struct position *p)
 	Uint32 c;
 
 	/* TOOD: konfigurowalny kolor zrobic */
-	c = SDL_MapRGB(screen->format, 123, 11, 53);
+    c = SDL_MapRGB(screen->format, 0xfd, 0xf9, 0x0c);
+
 	r.x = p->x;
 	r.y = p->y;
 	r.w = p->size * MATRIX_WIDTH;

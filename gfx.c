@@ -36,8 +36,9 @@ void
 fill_gradient(SDL_Surface *sf)
 {
 	SDL_Rect r;
-	Pixel A = {0, 0, 0};
-	Pixel B = {255, 0, 255};
+    Pixel A = {0x41, 0x3a, 0x02};
+    Pixel B = {0xcf, 0xcf, 0x04};
+
 	const int steps = sf->w;
 	int i;
 
