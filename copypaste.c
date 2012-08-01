@@ -710,3 +710,8 @@ static void cut_selection(struct game *g)
     }
     Selection.len = 0;
 }
+
+bool fits_preview(struct game *g, int x, int y)
+{
+    return can_pop_tetramino(g, x, y);
+}

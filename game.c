@@ -84,15 +84,15 @@ gameover(struct game *g)
     r.x = p->x + 10;
     r.y = p->y + p->size * PREVIEW_H + 60;
     char endMsg[1024];
-    sprintf(endMsg,"GAME OVER\nYour Score: %i\nPress any key",g->points,g->lines_cleared,g->level);
+    sprintf(endMsg,"GAME OVER\nYour Score: %i\nPress any key/button",g->points,g->lines_cleared,g->level);
     sf_puts(screen, &r, endMsg);
     SDL_UpdateRects(screen, 1, &r);
 
     r.y += r.h;
 
     SDL_Event e;
-    while (SDL_PollEvent(&e) == 0 || e.type != SDL_KEYDOWN) {
-        SDL_Delay(100);
+    while (SDL_PollEvent(&e) == 0 || (e.type != SDL_KEYDOWN && e.type != SDL_MOUSEBUTTONDOWN)) {
+        SDL_Delay(10);
     }
 
 

@@ -75,7 +75,7 @@ void mouseHover(struct game *g)
         mark_tmino(g, clickedx, clickedy);
         unmark_background(g);
         change_preview_visible(g, false);
-    } else if (check_background(g, clickedx, clickedy)) {
+    } else if (!fits_preview(g, clickedx, clickedy) && check_background(g, clickedx, clickedy)) {
         unmark_background(g);
         mark_background(g, clickedx, clickedy);
         change_preview_visible(g, false);
@@ -98,7 +98,7 @@ void recheckMouse(struct game *g)
     if (check_fallingtmino(g, clickedx, clickedy)) {
         mark_tmino(g, clickedx, clickedy);
         change_preview_visible(g, false);
-    } else if (check_background(g, clickedx, clickedy)) {
+    } else if (!fits_preview(g, clickedx, clickedy) && check_background(g, clickedx, clickedy)) {
         mark_background(g, clickedx, clickedy);
         change_preview_visible(g, false);
     } else {
