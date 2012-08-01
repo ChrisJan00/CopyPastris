@@ -39,10 +39,16 @@ void mouseClicked(struct game *g)
         return;
 
     if (g->marked) {
+        unselect_background(g);
         select_tmino(g, clickedx, clickedy);
     } else if (mark_valid(g)) {
+        unselect_tmino(g);
         move_mark_to_selection(g);
+    } else {
+        unselect_tmino(g);
+        unselect_background(g);
     }
+
     redraw_field(g);
 }
 
@@ -56,8 +62,12 @@ void mouseHover(struct game *g)
 {
     int clickedx, clickedy;
 
-    if (!get_mousecoords(g, &clickedx, &clickedy))
+    if (!get_mousecoords(g, &clickedx, &clickedy)) {
+        change_preview_visible(g, false);
+        g->marked = false;
+        redraw_field(g);
         return;
+    }
 
     // falling tetramino
     g->marked = false;

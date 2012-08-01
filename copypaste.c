@@ -154,6 +154,17 @@ void select_tmino(struct game *g, int x, int y)
     g->selected = true;
 }
 
+void unselect_tmino(struct game *g)
+{
+    g->selected = false;
+}
+
+void unselect_background(struct game *g)
+{
+    set_selection(g, false);
+    Selection.len = 0;
+}
+
 //void select_background(struct game *g, int x, int y)
 //{
 //    g->selected = false;
@@ -549,7 +560,7 @@ void mark_tmino(struct game *g, int x, int y)
 
 void mark_background(struct game *g, int x, int y)
 {
-    g->selected = false;
+//    g->selected = false;
     unmark_background(g);
 
     int pos = x + y * MATRIX_WIDTH;

@@ -26,5 +26,8 @@ void change_preview_visible(struct game *g, bool visible);
 bool mark_valid(struct game *g);
 void move_mark_to_selection(struct game *g);
 //void unselect_background(struct game *g);
+void unselect_tmino(struct game *g);
+void unselect_background(struct game *g);
+
 
 #endif
