@@ -120,7 +120,7 @@ init_game(void (*redraw)(struct game *), void (*levelup)(struct game *),
 		g->m[i].visible = false;
 
     autoplay_init();
-    restart_buffer(g);
+    clean_buffers(g);
 
 	return g;
 }
@@ -141,7 +141,7 @@ restart_game(struct game *g)
 	new_tetramino(g);
 
     autoplay_init();
-    restart_buffer(g);
+    clean_buffers(g);
 }
 
 void
