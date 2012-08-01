@@ -414,8 +414,8 @@ static void custom_check_lines(struct game *g, int destx, int desty)
             maxy = y;
     }
 
-    miny += desty;
-    maxy += desty;
+    miny += desty - Buffer.y_middle;
+    maxy += desty - Buffer.y_middle;
 
     int lines = 0;
 
@@ -435,13 +435,18 @@ static void custom_check_lines(struct game *g, int destx, int desty)
         }
     }
 
-    g->lines_cleared += lines;
-    g->points += g->level * lines * lines;
+    if (lines > 0) {
+        g->lines_cleared += lines;
+        g->points += g->level * lines * lines;
 
-    /* zmiana levelu jesli zbito odpowiednia ilosc lini */
-    if (g->lines_cleared >= LINES_PER_LEVEL * g->level) {
-        if (g->levelup)
-            g->levelup(g);
+        /* zmiana levelu jesli zbito odpowiednia ilosc lini */
+        if (g->lines_cleared >= LINES_PER_LEVEL * g->level) {
+            if (g->levelup)
+                g->levelup(g);
+        }
+        const struct tetramino *t = get_tetramino(g->next_tetramino);
+        if (g->preview)
+            g->preview(g, t->rotation[g->next_rotation], t->size);
     }
 }
 
