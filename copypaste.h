@@ -9,7 +9,7 @@ void manage_paste(struct game *g);
 void manage_cut(struct game *g);
 
 void select_tmino(struct game *g, int x, int y);
-void select_background(struct game *g, int x, int y);
+//void select_background(struct game *g, int x, int y);
 void undraw_preview(struct game *g);
 void draw_preview(struct game *g, bool force);
 void mark_tmino(struct game *g, int x, int y);
@@ -23,4 +23,8 @@ void draw_mark(struct game *g);
 
 void redraw_field(struct game *g);
 void change_preview_visible(struct game *g, bool visible);
+bool mark_valid(struct game *g);
+void move_mark_to_selection(struct game *g);
+//void unselect_background(struct game *g);
+
 #endif

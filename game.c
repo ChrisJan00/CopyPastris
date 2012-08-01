@@ -152,7 +152,8 @@ draw_tetramino(struct game *g, const int *blocks, int bg, int tc)
                 else if (g->marked)
                     SDL_BlitSurface(markOverlay, NULL, screen, &r);
             } else
-                SDL_BlitSurface(bground, &r, screen, &r);
+                if (!draw_preview_in_pos(g, x, y))
+                    SDL_BlitSurface(bground, &r, screen, &r);
         }
 		else
             if (!draw_preview_in_pos(g, x, y))
@@ -176,7 +177,7 @@ void draw_block(struct game *g, int x, int y, int color, bool valid)
         SDL_BlitSurface(previewOverlay, NULL, screen, &r);
     else
         SDL_BlitSurface(invalidOverlay, NULL, screen, &r);
-    SDL_UpdateRects(screen, 1, &r);
+//    SDL_UpdateRects(screen, 1, &r);
 }
 
 void draw_block_mark(struct game *g, int x, int y, int color)

@@ -24,13 +24,16 @@ static void prepare_selection(struct game *g);
 static void recurse_bg(struct game *g, int x, int y);
 static void normalize_selection();
 static void normalize_buffer();
-static void unselect_background(struct game *g);
+//static void unselect_background(struct game *g);
 static void move_selection_to_buffer(struct game *g);
-static void del_selection(struct game *g);
+//static void del_selection(struct game *g);
 static bool
 custom_check_bounds(const int *tmino, int len, int x, int y);
 static void custom_check_lines(struct game *g, int destx, int desty);
+static void move_buffer(blockinfo *bufferFrom, blockinfo *bufferTo);
+static void set_selection(struct game *g, bool selected);
 //static void unmark_background(struct game *g);
+static void cut_selection(struct game *g);
 
 bool preview_visible;
 
@@ -58,8 +61,9 @@ void manage_copy(struct game *g)
         g->selected = false;
     } else if (Selection.len > 0) {
         move_selection_to_buffer(g);
-        unselect_background(g);
+        set_selection(g, false);
     }
+    call_updaterects(g, 0, 0, MATRIX_WIDTH, MATRIX_HEIGHT);
 }
 
 void manage_paste(struct game *g)
@@ -84,8 +88,10 @@ void manage_cut(struct game *g)
         new_tetramino(g);
     } else if (Selection.len > 0) {
         move_selection_to_buffer(g);
-        del_selection(g);
+        set_selection(g, false);
+        cut_selection(g);
     }
+    call_updaterects(g, 0, 0, MATRIX_WIDTH, MATRIX_HEIGHT);
 }
 
 static void push_tetramino(struct game * g)
@@ -148,37 +154,37 @@ void select_tmino(struct game *g, int x, int y)
     g->selected = true;
 }
 
-void select_background(struct game *g, int x, int y)
-{
-    g->selected = false;
-    unselect_background(g);
+//void select_background(struct game *g, int x, int y)
+//{
+//    g->selected = false;
+//    unselect_background(g);
 
-    int pos = x + y * MATRIX_WIDTH;
-    if (!g->m[pos].visible) {
-        return;
-    }
+//    int pos = x + y * MATRIX_WIDTH;
+//    if (!g->m[pos].visible) {
+//        return;
+//    }
 
-    Selection.color = g->m[pos].color;
-    prepare_selection(g);
-    recurse_bg(g, x, y);
-    normalize_selection();
-    redraw_all(g);
-}
+//    Selection.color = g->m[pos].color;
+//    prepare_selection(g);
+//    recurse_bg(g, x, y);
+//    normalize_selection();
+//    redraw_all(g);
+//}
 
-static void unselect_background(struct game *g)
-{
-    if (Selection.len == 0)
-        return;
-    // go through the background
-    int i;
-    for (i=0; i<Selection.len; i++) {
-        int x = Selection.pos[i] % MATRIX_WIDTH + Selection.x_topleft;
-        int y = Selection.pos[i] / MATRIX_WIDTH + Selection.y_topleft;
-        int pos = x + y * MATRIX_WIDTH;
-        g->m[pos].selected = false;
-    }
-    Selection.len = 0;
-}
+//void unselect_background(struct game *g)
+//{
+//    if (Selection.len == 0)
+//        return;
+//    // go through the background
+//    int i;
+//    for (i=0; i<Selection.len; i++) {
+//        int x = Selection.pos[i] % MATRIX_WIDTH + Selection.x_topleft;
+//        int y = Selection.pos[i] / MATRIX_WIDTH + Selection.y_topleft;
+//        int pos = x + y * MATRIX_WIDTH;
+//        g->m[pos].selected = false;
+//    }
+//    Selection.len = 0;
+//}
 
 static void recurse_bg(struct game *g, int x, int y)
 {
@@ -330,42 +336,44 @@ static void normalize_mark()
 
 static void move_selection_to_buffer(struct game *g)
 {
-    int i;
-    for (i=0; i < Selection.len; i++)
-        Buffer.pos[i] = Selection.pos[i];
-    Buffer.color = Selection.color;
-    Buffer.len = Selection.len;
+    move_buffer(&Selection, &Buffer);
     normalize_buffer();
-    Buffer.x_topleft = -1;
-    Buffer.y_topleft = -1;
+//    int i;
+//    for (i=0; i < Selection.len; i++)
+//        Buffer.pos[i] = Selection.pos[i];
+//    Buffer.color = Selection.color;
+//    Buffer.len = Selection.len;
+//    normalize_buffer();
+//    Buffer.x_topleft = -1;
+//    Buffer.y_topleft = -1;
 }
 
-static void move_mark_to_selection(struct game *g)
-{
-    int i;
-    for (i=0; i < Mark.len; i++)
-        Selection.pos[i] = Mark.pos[i];
-    Selection.color = Mark.color;
-    Selection.len = Mark.len;
-    Selection.x_topleft = Mark.x_topleft;
-    Selection.y_topleft = Mark.y_topleft;
-}
+//static void move_mark_to_selection(struct game *g)
+//{
+//    int i;
+//    for (i=0; i < Mark.len; i++)
+//        Selection.pos[i] = Mark.pos[i];
+//    Selection.color = Mark.color;
+//    Selection.len = Mark.len;
+//    Selection.x_topleft = Mark.x_topleft;
+//    Selection.y_topleft = Mark.y_topleft;
+//}
 
-static void del_selection(struct game *g)
-{
-    if (Selection.len == 0)
-        return;
-    // go through the background
-    int i;
-    for (i=0; i<Selection.len; i++) {
-        int x = Selection.pos[i] % MATRIX_WIDTH + Selection.x_topleft;
-        int y = Selection.pos[i] / MATRIX_WIDTH + Selection.y_topleft;
-        int pos = x + y * MATRIX_WIDTH;
-        g->m[pos].selected = false;
-        g->m[pos].visible = false;
-    }
-    Selection.len = 0;
-}
+//static void del_selection(struct game *g)
+//{
+//    if (Selection.len == 0)
+//        return;
+//    // go through the background
+//    int i;
+//    for (i=0; i<Selection.len; i++) {
+//        int x = Selection.pos[i] % MATRIX_WIDTH + Selection.x_topleft;
+//        int y = Selection.pos[i] / MATRIX_WIDTH + Selection.y_topleft;
+//        int pos = x + y * MATRIX_WIDTH;
+//        g->m[pos].selected = false;
+//        g->m[pos].visible = false;
+//    }
+//    Selection.len = 0;
+//}
 
 static bool
 custom_check_bounds(const int *tmino, int len, int x, int y)
@@ -442,11 +450,6 @@ void undraw_preview(struct game *g)
     if (Buffer.len == 0)
         return;
 
-    int minx = MATRIX_WIDTH-1;
-    int miny = MATRIX_HEIGHT-1;
-    int maxx = 0;
-    int maxy = 0;
-
     int i;
     for (i = 0; i < Buffer.len; i++) {
         int x = Buffer.pos[i] % MATRIX_WIDTH + Buffer.x_topleft - Buffer.x_middle;
@@ -454,19 +457,9 @@ void undraw_preview(struct game *g)
         if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT)
             continue;
 
-        if (x < minx)
-            minx = x;
-        if (x > maxx)
-            maxx = x;
-        if (y < miny)
-            miny = y;
-        if (y > maxy)
-            maxy = y;
-
         draw_field(g, x, y);
     }
 
-    call_updaterects(g, minx, miny, maxx-minx+1, maxy-miny+1);
     Buffer.x_topleft = -1;
     Buffer.y_topleft = -1;
 }
@@ -570,8 +563,8 @@ void unmark_background(struct game *g)
     // go through the background
     int i;
     for (i=0; i<Mark.len; i++) {
-        int x = Mark.pos[i] % MATRIX_WIDTH + Mark.x_topleft - Mark.x_middle;
-        int y = Mark.pos[i] / MATRIX_WIDTH + Mark.y_topleft - Mark.y_middle;
+        int x = Mark.pos[i] % MATRIX_WIDTH + Mark.x_topleft;
+        int y = Mark.pos[i] / MATRIX_WIDTH + Mark.y_topleft;
 
         int pos = x + y * MATRIX_WIDTH;
         g->m[pos].marked = false;
@@ -596,7 +589,6 @@ bool draw_preview_in_pos(struct game *g, int x, int y)
 void redraw_field(struct game *g)
 {
     // no need to undraw/redraw shit
-
     int i;
 
     // first prepare visitation matrix
@@ -647,4 +639,58 @@ void redraw_field(struct game *g)
 void change_preview_visible(struct game *g, bool visible)
 {
     preview_visible = visible;
+}
+
+bool mark_valid(struct game *g)
+{
+    return Mark.len != 0;
+}
+
+void move_mark_to_selection(struct game *g)
+{
+    set_selection(g, false);
+    move_buffer(&Mark, &Selection);
+    set_selection(g, true);
+}
+
+static void move_buffer(blockinfo *bufferFrom, blockinfo *bufferTo)
+{
+    int i;
+    for (i=0; i < bufferFrom->len; i++)
+        bufferTo->pos[i] = bufferFrom->pos[i];
+    bufferTo->color = bufferFrom->color;
+    bufferTo->len = bufferFrom->len;
+    bufferTo->x_middle = bufferFrom->x_middle;
+    bufferTo->y_middle = bufferFrom->y_middle;
+    bufferTo->x_topleft = bufferFrom->x_topleft;
+    bufferTo->y_topleft = bufferFrom->y_topleft;
+}
+
+static void set_selection(struct game *g, bool selected)
+{
+    if (Selection.len == 0)
+        return;
+    // go through the background
+    int i;
+    for (i=0; i<Selection.len; i++) {
+        int x = Selection.pos[i] % MATRIX_WIDTH + Selection.x_topleft;
+        int y = Selection.pos[i] / MATRIX_WIDTH + Selection.y_topleft;
+        int pos = x + y * MATRIX_WIDTH;
+        g->m[pos].selected = selected;
+    }
+}
+
+static void cut_selection(struct game *g)
+{
+    if (Selection.len == 0)
+        return;
+    // go through the background
+    int i;
+    for (i=0; i<Selection.len; i++) {
+        int x = Selection.pos[i] % MATRIX_WIDTH + Selection.x_topleft;
+        int y = Selection.pos[i] / MATRIX_WIDTH + Selection.y_topleft;
+        int pos = x + y * MATRIX_WIDTH;
+        g->m[pos].visible = false;
+    }
+    Selection.len = 0;
 }
