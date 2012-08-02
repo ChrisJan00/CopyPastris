@@ -4,7 +4,11 @@
 #include <stdarg.h>
 
 #include <SDL/SDL.h>
+#ifdef MAC_OS_X_VERSION_10_6
+#include <SDL_ttf/SDL_ttf.h>
+#else
 #include <SDL/SDL_ttf.h>
+#endif
 #include "xerror.h"
 
 #define FONT_SIZE	15

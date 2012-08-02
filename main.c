@@ -63,8 +63,12 @@ main(int argc, char *argv[])
 	srand(time(NULL));
 
 	/* inicjalizacja fontow */
+#ifdef MAC_OS_X_VERSION_10_6
+    init_font("copypastris.app/Contents/Resources/FreeMonoBold.ttf");
+#else
     init_font("FreeMonoBold.ttf");
-
+#endif    
+    
 	bground = create_surface(SCREEN_WIDTH, SCREEN_HEIGHT);
 	fill_gradient(bground);
 	/* TODO: zrobic to ansi C kompatybilne */

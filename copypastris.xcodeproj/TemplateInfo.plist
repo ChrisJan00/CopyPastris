@@ -1,0 +1,12 @@
+{
+	FilesToRename = {
+		"SDLApp_Prefix.pch" = "copypastris_Prefix.pch";
+	};
+	FilesToMacroExpand = (
+		"copypastris_Prefix.pch",
+		"Info.plist",
+		"English.lproj/InfoPlist.strings",
+		"main.c",
+	);
+	Description = "This project builds an SDL-based application.";
+}

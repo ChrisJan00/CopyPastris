@@ -32,11 +32,13 @@ main_loop(struct game *g)
     SDL_Event e;
     Uint32 time;
 
+#ifndef MAC_OS_X_VERSION_10_6
     SDL_SetEventFilter(event_filter);
+#endif
     new_tetramino(g);
     time = SDL_GetTicks();
     do {
-        if (SDL_PollEvent(&e))
+        if (SDL_PollEvent(&e)) {
             switch (e.type) {
             case SDL_KEYDOWN:
                 handle_keyboard(&e.key.keysym, g);
@@ -45,6 +47,7 @@ main_loop(struct game *g)
                 handle_keyboardUnpressed(&e.key.keysym, g);
                 break;
             case SDL_MOUSEBUTTONDOWN:
+            
                 handle_mousedown(g);
                 break;
             case SDL_MOUSEMOTION:
@@ -53,7 +56,7 @@ main_loop(struct game *g)
             case SDL_QUIT:
                 return;
             }
-
+        }
         if (SDL_GetTicks() >= time + g->fall_time) {
             move_tetramino(g, DOWN);
             time = SDL_GetTicks();
