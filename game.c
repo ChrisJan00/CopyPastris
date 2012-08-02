@@ -91,7 +91,7 @@ gameover(struct game *g)
     r.y += r.h;
 
     SDL_Event e;
-    while (SDL_PollEvent(&e) == 0 || (e.type != SDL_KEYDOWN && e.type != SDL_MOUSEBUTTONDOWN)) {
+    while (SDL_WaitEvent(&e) && (e.type != SDL_KEYDOWN && e.type != SDL_MOUSEBUTTONDOWN)) {
         SDL_Delay(10);
     }
 
